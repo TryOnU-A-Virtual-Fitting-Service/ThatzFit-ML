@@ -1,0 +1,66 @@
+# Python 관련 캐시 및 컴파일 파일
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.db
+
+# 가상 환경 파일 및 디렉토리
+.venv/
+env/
+venv/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# 환경 변수 파일 제외 (배포용 환경에 맞게 선택적으로 포함)
+*.env.*
+
+# Docker 관련 파일
+.dockerignore
+docker-compose.yml
+docker-compose.override.yml
+
+# IDE 및 OS 생성 파일
+*.DS_Store
+*.idea/
+*.vscode/
+*.swp
+
+# 테스트 및 로그 파일
+*.log
+logs/
+coverage/
+__snapshots__
+.cache/
+tests/
+test/
+
+# Node 관련 파일 (프론트엔드가 포함된 경우)
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+dist/
+build/
+
+# Git 관련 파일
+.git
+.gitignore
+.gitattributes
+.gitmodules
+
+# 이미지와 기타 리소스 파일
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.pdf
+
+# 임시 파일
+*.swp
+*.swn
+*.bak
+*.backup
+*.tmp
