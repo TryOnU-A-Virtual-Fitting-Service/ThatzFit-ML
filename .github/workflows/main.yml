@@ -47,10 +47,10 @@ jobs:
           key: ${{ secrets.ML_EC2_PRIVATE_KEY }}
           script: |
             aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin 538189757945.dkr.ecr.ap-northeast-2.amazonaws.com
-            docker stop thatzfit-ml-container
-            docker rm thatzfit-ml-container
-            docker pull ${{ steps.build-image.outputs.image }}
-            docker run -d --name thatzfit-ml-container -p 8000:8000 --restart always ${{ steps.build-image.outputs.image }}
+            sudo docker stop thatzfit-ml-container
+            sudo docker rm thatzfit-ml-container
+            sudo docker pull ${{ steps.build-image.outputs.image }}
+            sudo docker run -d --name thatzfit-ml-container -p 8000:8000 --restart always ${{ steps.build-image.outputs.image }}
             
   notify-slack:
     # build-and-deploy job이 끝난 후에 실행되도록 설정
@@ -60,12 +60,32 @@ jobs:
     if: always()
 
     steps:
-      - name: Send Slack Notification
+      - name: Send Slack Notification (BlockKit)
         uses: slackapi/slack-github-action@v1.26.0
         with:
-          text: "${{ github.repository }} - 배포 결과: ${{ needs.build-and-deploy.result }}"
-          status: ${{ needs.build-and-deploy.result }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚀 배포 결과: ${{ needs.build-and-deploy.result }}",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    { "type": "mrkdwn", "text": "*Repository:*\n${{ github.repository }}" },
+                    { "type": "mrkdwn", "text": "*Branch:*\n${{ github.ref }}" },
+                    { "type": "mrkdwn", "text": "*Commit:*\n<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>" },
+                    { "type": "mrkdwn", "text": "*Author:*\n${{ github.actor }}" }
+                  ]
+                }
+              ]
+            }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    
