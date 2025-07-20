@@ -34,6 +34,7 @@ jobs:
           ECR_REPOSITORY: attentionplease/thatzfit-ml # ECR 리포지토리 이름 
           IMAGE_TAG: ${{ github.sha }}-run-${{ github.run_id }}
         run: |
+          aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin 538189757945.dkr.ecr.ap-northeast-2.amazonaws.com
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
@@ -50,3 +51,20 @@ jobs:
             docker rm thatzfit-ml-container
             docker pull ${{ steps.build-image.outputs.image }}
             docker run -d --name thatzfit-ml-container -p 8000:8000 --restart always ${{ steps.build-image.outputs.image }}
+            
+  notify-slack:
+    # build-and-deploy job이 끝난 후에 실행되도록 설정
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    # build-and-deploy job의 성공/실패 여부와 상관없이 항상 실행
+    if: always()
+
+    steps:
+      - name: Send Slack Notification
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          status: ${{ needs.build-and-deploy.result }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
