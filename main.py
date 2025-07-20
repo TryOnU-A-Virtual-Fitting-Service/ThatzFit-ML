@@ -13,16 +13,12 @@ import os
 import uuid
 from rembg import remove
 from starlette.responses import StreamingResponse
+from fastapi import APIRouter
+
 
 app = FastAPI()
 
-# /ml 접두사를 가진 라우터 생성
-ml_router = APIRouter(
-    prefix="/ml",
-    tags=["ml"],
-)
-
-@app.get("/health")
+@app.get("/ml/health")
 def health_check():
     return {"message": "thatzfit-image-worker is running"}
 
@@ -83,7 +79,7 @@ def preprocess_image(image_bytes):
 
 
 # 예측
-@app.post("/predict")
+@app.post("/ml/predict")
 async def predict(file: UploadFile = File(...)):
     # 모델 상태 확인
     if model is None:
@@ -144,7 +140,7 @@ async def predict(file: UploadFile = File(...)):
 
 
 
-@app.post("/remove-background")
+@app.post("/ml/remove-background")
 async def remove_background(file: bytes = File(...)):
     try:
         output_image = remove(file)
